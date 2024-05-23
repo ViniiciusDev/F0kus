@@ -2,8 +2,13 @@ const addTaskBtn = document.querySelector(".app__button--add-task");
 const formAddTask = document.querySelector(".app__form-add-task");
 const textarea = document.querySelector(".app__form-textarea");
 const ulTasks = document.querySelector(".app__section-task-list");
+const cancelBtn = document.querySelector(".app__form-footer__button--cancel");
 
 const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function editContentLocalStorage() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 function createElementTask(task) {
     const li = document.createElement("li");
@@ -22,6 +27,15 @@ function createElementTask(task) {
     const btn = document.createElement("button");
     btn.classList.add("app_button-edit");
 
+    btn.onclick = () => {
+        const newTask = prompt("Digite sua alteração");
+        if (newTask) {
+            paragraph.textContent = newTask;
+            task.descricao = newTask;
+            editContentLocalStorage();
+        }
+    };
+
     const img = document.createElement("img");
     img.setAttribute("src", "/imagens/edit.png");
 
@@ -32,6 +46,11 @@ function createElementTask(task) {
     li.append(btn);
 
     return li;
+}
+
+function cancelContent() {
+    textarea.value = "";
+    formAddTask.classList.add("hidden");
 }
 
 addTaskBtn.addEventListener("click", () => {
@@ -46,9 +65,12 @@ formAddTask.addEventListener("submit", (event) => {
     tasks.push(task);
     const elementTask = createElementTask(task);
     ulTasks.append(elementTask);
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    textarea.value = "";
-    formAddTask.classList.add("hidden");
+    editContentLocalStorage();
+    cancelContent();
+});
+
+cancelBtn.addEventListener("click", () => {
+    cancelContent();
 });
 
 tasks.forEach((task) => {
