@@ -85,6 +85,11 @@ function alterarContexto(contexto) {
 const contagemRegressiva = () => {
     if (temporizadorEmSegundos <= 0) {
         audioEnd.play();
+        const activeFocus = html.getAttribute("data-contexto") == "foco";
+        if (activeFocus) {
+            const event = new CustomEvent("endedFocus");
+            document.dispatchEvent(event);
+        }
         stop();
         return;
     }
