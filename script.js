@@ -35,7 +35,7 @@ musicInput.addEventListener("change", () => {
     }
 });
 focusBtn.addEventListener("click", () => {
-    temporizadorEmSegundos = 1500;
+    temporizadorEmSegundos = 5;
     alterarContexto("foco");
     focusBtn.classList.add("active");
 });

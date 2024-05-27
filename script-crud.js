@@ -8,8 +8,11 @@ const taskActiveDescription = document.querySelector(
     ".app__section-active-task-description"
 );
 
+const removeCompleteTaskBtn = document.querySelector("#btn-remover-concluidas");
+const removeAllTaskBtn = document.querySelector("#btn-remover-todas");
+
 // Constante que pega os itens salvos no localStorage
-const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let selectedTask = null;
 let liSelectedTask = null;
 // Método que transformar as tasks em itens no localStorage com stringify
@@ -54,25 +57,34 @@ function createElementTask(task) {
     li.append(svg);
     li.append(paragraph);
     li.append(btn);
-    // Seleção de tarefas
-    li.onclick = () => {
-        // debugger;
-        document
-            .querySelectorAll(".app__section-task-list-item-active")
-            .forEach((element) => {
-                element.classList.remove("app__section-task-list-item-active");
-            });
-        if (selectedTask == task) {
-            taskActiveDescription.textContent = "";
-            selectedTask = null;
-            liSelectedTask = null;
-            return;
-        }
-        selectedTask = task;
-        liSelectedTask = li;
-        taskActiveDescription.textContent = task.descricao;
-        li.classList.add("app__section-task-list-item-active");
-    };
+    if (task.complete) {
+        // Complementado a verificação do evento endedFocus, criamos a condição que se for complete, em li adicionamos a class complete e o btn será desativado.
+        li.classList.add("app__section-task-list-item-complete");
+        btn.setAttribute("disabled", "disabled");
+    } else {
+        // Caso contrário será chamado o método li.onclick.
+        // Seleção de tarefas
+        li.onclick = () => {
+            // debugger;
+            document
+                .querySelectorAll(".app__section-task-list-item-active")
+                .forEach((element) => {
+                    element.classList.remove(
+                        "app__section-task-list-item-active"
+                    );
+                });
+            if (selectedTask == task) {
+                taskActiveDescription.textContent = "";
+                selectedTask = null;
+                liSelectedTask = null;
+                return;
+            }
+            selectedTask = task;
+            liSelectedTask = li;
+            taskActiveDescription.textContent = task.descricao;
+            li.classList.add("app__section-task-list-item-active");
+        };
+    }
     // Return que irá retornar o inteiro item
     return li;
 }
@@ -109,10 +121,30 @@ tasks.forEach((task) => {
 
 document.addEventListener("endedFocus", () => {
     if (selectedTask && liSelectedTask) {
+        // A condição é criada para que quando tivermos selected task && liSelectedTask, ele remova a class active e adicione a complete.
         liSelectedTask.classList.remove("app__section-task-list-item-active");
         liSelectedTask.classList.add("app__section-task-list-item-complete");
+        // E pegue em li o elemento button e adicione nele os atributos disabled disabled
         liSelectedTask
             .querySelector("button")
             .setAttribute("disabled", "disabled");
+        // Esse booleano vem criado para conseguirmos identificar que a selected task.complete sejá = true (verdadeira)
+        selectedTask.complete = true;
+        // E assim atualizamos a localStorage.
+        editContentLocalStorage();
     }
 });
+
+const removeTasks = (onlyComplete) => {
+    const selector = onlyComplete
+        ? ".app__section-task-list-item-complete"
+        : ".app__section-task-list-item";
+    document.querySelectorAll(selector).forEach((element) => {
+        element.remove();
+    });
+    tasks = onlyComplete ? tasks.filter((task) => !task.complete) : [];
+    editContentLocalStorage();
+};
+
+removeCompleteTaskBtn.onclick = () => removeTasks(true);
+removeAllTaskBtn.onclick = () => removeTasks(false);
